@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run MCP Skills Server",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp_server.py",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  ]
+}
