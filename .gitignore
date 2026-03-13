@@ -138,6 +138,10 @@ celerybeat.pid
 .env
 .envrc
 .venv
+
+# Skills linked from other locations (junctions/symlinks)
+skills/youtube-search/
+skills/notebooklm/
 env/
 venv/
 ENV/
