@@ -1,144 +1,145 @@
-# Claude MCP Skills Server
+# claude-mcp-skills-server
 
-A local MCP server that exposes Wayne's coaching and research skills as tools for Claude Code and the Claude desktop app.
+A local [Model Context Protocol](https://modelcontextprotocol.io/) server that extends Claude Code and the Claude desktop app with custom skills — coaching personas, research pipelines, and tool integrations — without touching a line of application code.
+
+Built and maintained using vibe-coding methodology: Claude Code writes the implementation, I write the skills.
+
+---
+
+## What it does
+
+Skills in this server are just markdown files. Each `SKILL.md` defines a persona, a methodology, and a set of instructions. When Claude invokes a skill tool, the server reads the file fresh, wraps it in a persona-activation prompt, and returns it — transforming Claude into a specialist for that conversation.
+
+The server is also a practical demonstration of agentic AI composition: skills like `yt-research-pipeline` don't just return text, they orchestrate multi-step workflows across external tools (yt-dlp, the NotebookLM CLI) with background subagents handling long-running tasks while the main conversation stays unblocked.
+
+---
 
 ## Architecture
 
 ```
-Claude (desktop or CLI) ←→ stdio ←→ mcp_server.py ←→ skills/{name}/SKILL.md
+Claude Code or Claude desktop app
+          |
+          | stdio (MCP protocol)
+          |
+    mcp_server.py  (FastMCP, single file)
+          |
+          | scans at startup
+          |
+    skills/
+      notebooklm/SKILL.md
+      rugby-session-coach/SKILL.md
+      stoic-reflection-coach/SKILL.md
+      youtube-search/SKILL.md
+      yt-research-pipeline/SKILL.md
 ```
 
-Skills are auto-discovered from the `skills/` directory at server startup. Each folder containing a valid `SKILL.md` becomes a callable tool. No code changes are needed to add or remove skills — only a server restart.
+The server is a single Python file, `mcp_server.py`, built on [FastMCP](https://github.com/jlowin/fastmcp). At import time it scans `./skills/`, reads frontmatter from each `SKILL.md`, and dynamically registers one MCP tool per skill — no code changes required to add or remove skills.
+
+**Startup flow:** `register_skill_tools()` scans `skills/` → reads `SKILL.md` frontmatter → derives tool name (`invoke_<sanitized_name>`) → registers handler via `mcp.tool()`.
+
+**Tool call flow:** Handler re-reads `SKILL.md` fresh on every invocation (so you can edit a skill without restarting the server), strips frontmatter, wraps body in a persona-activation prompt, returns as string.
+
+One deliberate design decision: tool names are derived from the `name` frontmatter field, not the folder name. The folder is just storage; the name in frontmatter is what Claude sees. A factory function closes over each skill's data to avoid the classic late-binding closure bug in Python loops.
+
+---
+
+## Skills
+
+### `invoke_rugby_session_coach`
+
+Expert rugby coach mentor that guides coaches through session planning via Socratic dialogue. Built around the Trojans RFC Coaching Framework and RFU principles (APES criteria, Coaching Habits, RFU Activate warm-up protocol).
+
+Does not write the session plan for you — it coaches you through building it. Covers context gathering, priority identification, structure development, and logistics, then generates two artefacts: a full structured session plan and a condensed WhatsApp summary for the coaching team.
+
+### `invoke_stoic_reflection_coach`
+
+Stoic philosophy coaching persona for navigating difficult situations using Socratic dialogue rather than lectures. Applies the dichotomy of control as the core analytical frame, the four Stoic virtues as guides to action, and six practical exercises. Includes guardrails: explicitly flags when a situation warrants professional help rather than philosophy.
+
+### `invoke_youtube_search`
+
+Searches YouTube via `yt-dlp` and returns ranked results with rich metadata: title, channel, subscriber count, view count, duration, upload date, and an engagement ratio (views / subscribers) that surfaces content punching above a channel's weight.
+
+### `invoke_notebooklm`
+
+Full programmatic access to Google NotebookLM — including capabilities not exposed in the web UI. Covers the complete workflow: create notebooks, add sources (URLs, YouTube, PDFs, audio, video, images), chat with content, generate all artifact types (podcast, video, slide deck, infographic, report, mind map, quiz, flashcards), download in multiple formats, manage sharing.
+
+### `invoke_yt_research_pipeline`
+
+End-to-end orchestration pipeline: YouTube search → credibility scoring → NotebookLM notebook → artefact generation.
+
+**Pipeline stages:**
+1. Search YouTube via yt-dlp (fetches 40 candidates)
+2. Score and re-rank by credibility (40% view popularity, 30% channel authority, 30% engagement ratio)
+3. Confirm top results with the user before proceeding
+4. Create a NotebookLM notebook and add top video URLs as sources
+5. Wait for source processing (uses background subagents for parallel waiting)
+6. Generate briefing doc (reliable), then attempt podcast and infographic (rate-limited)
+7. Output a folder: `yt-research-[topic]-[YYYYMMDD]/` containing `metadata.md`, `briefing.md`, `podcast.mp3`, `infographic.png`
 
 ---
 
 ## Setup
 
-**1. Create virtual environment and install dependencies**
+**Requirements:** Python 3.11+, `yt-dlp` on PATH, `notebooklm-py` with browser extra
+
 ```bash
 python -m venv .venv
-.venv\Scripts\activate   # Windows
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # macOS / Linux
 pip install -r requirements.txt
 ```
 
-**2. Register with Claude Code (CLI)**
+**Register with Claude Code:**
 ```bash
-claude mcp add wayne-skills -- "C:/Users/kenho/Projects/claude-mcp-skills-server/.venv/Scripts/python.exe" "C:/Users/kenho/Projects/claude-mcp-skills-server/mcp_server.py"
-```
-Use **forward slashes** — backslashes in the config JSON cause escape failures on Windows.
+claude mcp add wayne-skills -- \
+  "C:/path/to/.venv/Scripts/python.exe" \
+  "C:/path/to/claude-mcp-skills-server/mcp_server.py"
 
-Verify with:
-```bash
 claude mcp list
-# wayne-skills: ... ✓ Connected
+# wayne-skills: ... connected
 ```
 
-**3. Register with Claude desktop app**
+Use forward slashes on Windows — backslashes in the JSON config cause escape failures.
 
-Add to `%APPDATA%\Claude\claude_desktop_config.json`:
+**Register with Claude desktop app** — add to `%APPDATA%\Claude\claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
     "wayne-skills": {
-      "command": "C:/Users/kenho/Projects/claude-mcp-skills-server/.venv/Scripts/python.exe",
-      "args": ["C:/Users/kenho/Projects/claude-mcp-skills-server/mcp_server.py"]
+      "command": "/path/to/.venv/Scripts/python.exe",
+      "args": ["/path/to/mcp_server.py"]
     }
   }
 }
 ```
-Restart the desktop app after saving. Skills appear under the tools (plug) icon in the chat input bar.
 
 ---
 
-## Current Skills
+## Adding a skill
 
-| Tool name | Description |
-|-----------|-------------|
-| `invoke_stoic_reflection_coach` | Stoic philosophical coaching persona |
-| `invoke_rugby_session_planning_coach` | Rugby session planning coaching persona |
-| `invoke_youtube_search` | Search YouTube via yt-dlp with ranked results |
-| `invoke_notebooklm` | Full NotebookLM API — create notebooks, podcasts, briefings |
+1. Create `skills/{folder-name}/SKILL.md` with frontmatter:
 
----
-
-## Invoking Skills
-
-### Claude Code (CLI)
-
-**Natural language** — Claude will call the right tool automatically:
-> *"Activate the stoic reflection coach"*
-> *"Search YouTube for talks on stoicism"*
-
-**Direct slash command:**
-```
-/mcp__wayne-skills__invoke_stoic_reflection_coach
-/mcp__wayne-skills__invoke_youtube_search
-/mcp__wayne-skills__invoke_notebooklm
-/mcp__wayne-skills__invoke_rugby_session_planning_coach
-```
-
-### Claude desktop app
-
-Use natural language — the assistant picks up the tool from context. You can also click the plug icon in the chat input bar to browse and invoke tools manually.
-
----
-
-## Editing Skills
-
-Skill content is read **fresh on every tool call** — edits take effect immediately without restarting the server.
-
-| Skill | File location |
-|-------|--------------|
-| `stoic-reflection-coach` | `skills/stoic-reflection-coach/SKILL.md` |
-| `rugby-session-planning-coach` | `skills/rugby-session-planning-coach/SKILL.md` |
-| `youtube-search` | `C:\Users\kenho\.claude\skills\youtube-search\SKILL.md` (source) |
-| `notebooklm` | `C:\Users\kenho\.claude\skills\notebooklm\SKILL.md` (source) |
-
-`youtube-search` and `notebooklm` are junction-linked from `~/.claude/skills/` — edit the source files there, not inside this repo.
-
-The `name` and `description` frontmatter fields are only read at **startup**. Changing them requires a server restart to take effect.
-
----
-
-## Adding New Skills
-
-### Option A — Self-contained skill (lives in this repo)
-
-1. Create `skills/{your-skill-name}/SKILL.md` with valid frontmatter:
 ```markdown
 ---
-name: your-skill-name
-description: One-line description shown to Claude as the tool description.
+name: my-skill
+description: One line shown to Claude as the tool description.
 ---
 
-Your skill content here...
+Skill body here — persona, methodology, instructions.
 ```
-2. Restart the MCP server (Claude Code: `claude mcp restart wayne-skills`; desktop app: restart the app).
 
-### Option B — Linked skill (source lives elsewhere)
+2. Restart the server (`claude mcp restart wayne-skills` in Claude Code, or restart the desktop app).
 
-Use a junction so the skill is maintained in its source location:
-```python
-import subprocess
-subprocess.run([
-    'cmd.exe', '/c', 'mklink', '/J',
-    r'skills\your-skill-name',
-    r'C:\path\to\source\your-skill-name'
-])
+Skill content is re-read on every tool call — edits to the body take effect immediately. Changes to `name` or `description` frontmatter require a restart.
+
+---
+
+## Skill file format
+
 ```
-Then add the folder to `.gitignore`:
+skills/
+  {folder-name}/
+    SKILL.md          # required — frontmatter + persona body
+    scripts/          # optional — helper scripts called by the skill
+    references/       # optional — supplementary docs referenced in the body
 ```
-skills/your-skill-name/
-```
-Restart the server to register the new tool.
-
-### Tool naming
-
-The folder name is irrelevant — the tool name is derived from the `name` field in frontmatter:
-- Lowercased, spaces and hyphens → underscores
-- Non-alphanumeric characters stripped
-- Prefixed with `invoke_`
-
-Example: `name: My Skill` → tool `invoke_my_skill`
-
-Folders without a `SKILL.md`, or with missing/invalid `name` frontmatter, are skipped with a warning at startup.
