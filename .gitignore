@@ -139,8 +139,17 @@ celerybeat.pid
 .envrc
 .venv
 
-# Skills linked from other locations (junctions/symlinks)
-skills/youtube-search/
+# Vendored third-party skill content, deliberately not republished from this
+# PUBLIC repo. NOT junctions or symlinks -- an earlier version of this comment
+# said they were; os.path.islink() reports False for both.
+#
+#   notebooklm/ - upstream packaged skill from notebooklm-py, regenerate with
+#                 `notebooklm skill show` (see the local addendum at the foot of
+#                 its SKILL.md). Kept out of this public repo as third-party content.
+#
+# youtube-search/ used to be listed here too. It is NOT third-party -- it is
+# own work, and it holds youtube_search.py, one of the two scripts CLAUDE.md
+# protects from edits. Tracked as of 2026-09-11 so it has history and a backup.
 skills/notebooklm/
 env/
 venv/

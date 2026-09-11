@@ -1,0 +1,23 @@
+{
+  "skill_name": "rugby-session-coach",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need to plan a session for my U10s this Sunday. I'm thinking we should work on passing, tackling, rucking, and maybe some lineout practice too. We've got about 18 kids coming and two other coaches. It's been a bit chaotic lately and I want to make sure we cover everything.",
+      "expected_output": "The skill should: (1) use Socratic questioning rather than prescribing a plan, (2) challenge the over-ambitious multi-topic agenda and push the coach to identify ONE priority, (3) ask about recent observations to ground the session in evidence, (4) note that U10 sessions are 60 mins, (5) NOT immediately produce a session plan — keep the conversation going to draw out the coach's thinking.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm coaching U14s tomorrow and I want to focus on defensive shape but I'm not sure how to structure it. We have 90 minutes, about 22 players, and three coaches. I've been coaching for 8 years so I know my way around a session — I just want help thinking through the structure and making sure I'm not over-engineering it.",
+      "expected_output": "The skill should: (1) acknowledge the coach's experience and adjust tone to peer-level challenge, (2) ask what specific defensive shape issue they've observed in games (not just 'defensive shape' as a vague goal), (3) explore structure options (game-based vs skills zones) and probe their instinct, (4) push for clarity on what 'good defensive shape' would look like in practice, (5) check how they'll build progressions and choice into the session. Should NOT produce a plan immediately — still in context-gathering/priority phase.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "We just had a really tough game with the U7s yesterday — lots of kids crying, parents complaining, and the session felt like chaos. I want to reflect on what went wrong and then plan a better session for next week.",
+      "expected_output": "The skill should: (1) start with empathy — acknowledge this sounds hard before jumping into problem-solving, (2) use reflective questions to help the coach analyse what happened (what did they observe, what surprised them, what would they do differently), (3) explore whether the session design contributed to the chaos or if other factors were at play, (4) naturally transition from reflection to next-session planning once learnings are clear, (5) for U7s: ensure any plan stays simple (tag/touch, activities <5 mins, fun-focused). Should treat this as both a reflection AND a planning conversation.",
+      "files": []
+    }
+  ]
+}
