@@ -43,17 +43,41 @@ User query
 
 The search script is at `C:/Users/kenho/Projects/claude-mcp-skills-server/skills/youtube-search/scripts/youtube_search.py`.
 
-Run it with `--json` to get raw data, fetching extra results since we'll re-rank by credibility:
+Run it with `--json` to get raw data. **Fan out across 3-4 narrow queries at `--results 15`, then merge** — do not run one broad query at a high count.
+
+**Why: yt-dlp has a hard 180-second search ceiling.** `--results 40` never returns inside it and
+fails with `ERROR: Search timed out after 180 seconds.` 15 per query completes reliably.
+Several narrow queries also give better coverage than one broad one, because YouTube's ranking
+is query-specific — four angles surface videos a single query buries.
 
 ```bash
-python "C:/Users/kenho/Projects/claude-mcp-skills-server/skills/youtube-search/scripts/youtube_search.py" \
-  "QUERY HERE" \
-  --results 40 \
-  --months 6 \
-  --json > "OUTPUT_DIR/raw_results.json"
+SEARCH="C:/Users/kenho/Projects/claude-mcp-skills-server/skills/youtube-search/scripts/youtube_search.py"
+
+# One call per angle. Vary the wording; do not just repeat the topic.
+python "$SEARCH" "QUERY ANGLE A" --results 15 --months 6 --json > "OUTPUT_DIR/raw_a.json"
+python "$SEARCH" "QUERY ANGLE B" --results 15 --months 6 --json > "OUTPUT_DIR/raw_b.json"
+python "$SEARCH" "QUERY ANGLE C" --results 15 --months 6 --json > "OUTPUT_DIR/raw_c.json"
+python "$SEARCH" "QUERY ANGLE D" --results 15 --months 6 --json > "OUTPUT_DIR/raw_d.json"
 ```
 
-Adjust `--months` if the user specifies a time window. Fetch 40 to have headroom after scoring (we'll keep the top 20-25 after ranking).
+Merge and de-duplicate on video ID before scoring:
+
+```bash
+python - <<'EOF'
+import glob, json
+seen, out = set(), []
+for f in sorted(glob.glob("OUTPUT_DIR/raw_*.json")):
+    for v in json.load(open(f, encoding="utf-8")):
+        k = v.get("id") or v.get("url")
+        if k and k not in seen:
+            seen.add(k); out.append(v)
+json.dump(out, open("OUTPUT_DIR/raw_results.json", "w", encoding="utf-8"))
+print(f"{len(out)} unique videos")
+EOF
+```
+
+That lands 40-50 unique videos — the headroom Phase 2 wants — without ever touching the timeout.
+Adjust `--months` if the user specifies a time window.
 
 ## Phase 2: Score and rank
 
@@ -191,8 +215,10 @@ Create it in the current working directory, or in a `~/Research/` folder if the 
 
 | Situation | Action |
 |-----------|--------|
-| NotebookLM not authenticated | Stop, tell user to run `PYTHONUTF8=1 notebooklm login` |
+| NotebookLM not authenticated | Stop, tell user to run `PYTHONUTF8=1 notebooklm login` **in their own terminal** — it needs a browser and cannot be driven from inside a session |
+| `auth check` passes but `create` redirects to accounts.google.com | **`auth check` validates the cookie file, not the session** — a pass is not proof. Treat the first real call as the auth test |
 | YouTube search returns < 5 results | Warn user, suggest wider time window (--months 12) |
+| `ERROR: Search timed out after 180 seconds.` | `--results` too high. Drop to 15 and add another query angle. Never raise it above 15 |
 | Source add fails for a URL | Skip and log; proceed with the others |
 | Source processing fails | Mark as failed in summary; exclude from generation |
 | Artifact generation rate-limited | Log failure, include retry command in summary |

@@ -31,7 +31,7 @@ python "<skill-dir>/scripts/youtube_search.py" "QUERY" [options]
 **Options:**
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--results N` / `-n N` | 20 | Number of results to return |
+| `--results N` / `-n N` | 20 | Number of results to return. **Pass 15 explicitly** — see timeout note below |
 | `--months N` / `-m N` | 6 | Filter to last N months |
 | `--json` | off | Dump raw JSON instead of formatted output |
 
@@ -42,6 +42,11 @@ python script.py "rust programming tutorial"
 
 # Custom time range
 python script.py "valorant tips" --months 3
+
+> **yt-dlp has a hard 180-second search ceiling.** Above ~15 results the search does not finish
+> inside it and dies with `ERROR: Search timed out after 180 seconds.` The script's default of 20
+> is marginal and 40 always fails. For breadth, run several narrower queries at `--results 15`
+> and merge, rather than raising the count.
 
 # Fewer results, wider window
 python script.py "claude ai demo" --results 5 --months 12
