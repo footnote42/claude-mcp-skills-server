@@ -1,6 +1,24 @@
-# CLAUDE.md
+# claude-mcp-skills-server
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Purpose
+FastMCP server that dynamically registers one MCP tool per skill file discovered in `./skills/` — the wayne-skills server powering Cowork and coaching tools in Claude Code.
+
+## Status
+Active — production use. Registered as `wayne-skills` in Claude Code's MCP config.
+
+## Workflow
+Ad-hoc. Python/FastMCP; re-register with `claude mcp add` after path changes.
+
+## Key Paths
+- Server: `mcp_server.py`
+- Skills: `skills/<folder-name>/SKILL.md`
+- Venv: `.venv/Scripts/python.exe` (Windows)
+
+## Active Priorities
+- Add new skills by dropping a `SKILL.md` into `skills/` — no code changes needed.
+- Verify registration: `python -c "import mcp_server"` (silent = success).
+
+---
 
 ## Commands
 
@@ -45,6 +63,16 @@ description: One-liner     # shown to Claude as the tool description
 The body (everything after `---`) is returned verbatim as the coaching persona content. Only `SKILL.md` is loaded; any `Resources/` or `references/` subdirectories are ignored.
 
 **Tool naming:** `name` is lowercased, spaces/hyphens → underscores, non-alphanumeric chars stripped, prefixed with `invoke_`. Invalid names are skipped with a warning at startup.
+
+## Verifying a New Skill
+
+After adding a `skills/<folder-name>/SKILL.md`, verify registration without restarting the MCP server:
+
+```bash
+python -c "import mcp_server"
+```
+
+Expected: no output (silent success). Any `WARNING: Skipping skill` line means the frontmatter `name` field is missing, malformed, or produces an invalid tool name. The registered tool name will be printed at startup when you run `python mcp_server.py`.
 
 ## MCP Registration Note
 

@@ -1,0 +1,25 @@
+{
+  "skill_name": "stoic-reflection-coach",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm furious at my manager. She took my idea in a meeting and presented it as her own in front of the whole team. I can't stop thinking about it.",
+      "expected_output": "Coach opens with acknowledgment, applies dichotomy of control, explores the user's judgment about the event, guides toward a virtuous response. Does NOT lecture. Uses Socratic questions."
+    },
+    {
+      "id": 2,
+      "prompt": "I want to start doing some daily Stoic practice. Where should I begin?",
+      "expected_output": "Coach introduces morning/evening reflection structure and the dichotomy of control exercise. Suggests the vault templates. Keeps it practical and accessible."
+    },
+    {
+      "id": 3,
+      "prompt": "My dad died two months ago. People keep telling me to stay positive but I just feel empty and like nothing matters.",
+      "expected_output": "Coach corrects the misunderstanding that Stoics suppress emotion. Validates grief as appropriate. Distinguishes facts from added judgments ('nothing matters'). Compassionate and measured throughout."
+    },
+    {
+      "id": 4,
+      "prompt": "I'm thinking about quitting my stable job to start something of my own but I'm terrified I'll lose everything.",
+      "expected_output": "Coach applies negative visualization and preferred indifferents framework. Helps separate real risks (financial) from fear-based judgments. Guides toward virtuous decision-making process, not prescriptive advice."
+    }
+  ]
+}
