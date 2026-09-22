@@ -1,18 +1,20 @@
 # NOW — claude-mcp-skills-server
 
 ## Status
-QUEUED — no active work, repo healthy
+QUEUED — no active work, repo healthy; intent to return and develop further
 
 ## Next
-Add new skills by dropping a `SKILL.md` into `skills/`; verify with `python -c "import mcp_server"`.
+Read `mcp_server.py` end to end and write down how discovery, registration and the tool-call flow work; then decide what to build on it.
 
 ## Context
-- 5 skills registered clean: notebooklm, rugby-session-coach, stoic-reflection-coach, youtube-search, yt-research-pipeline
+- Purpose: built for the YouTube → NotebookLM research cycle; also serves as a shared skills layer between Claude Code and Claude Desktop
+- In daily use: registered as `wayne-skills`, 5 skills load clean (notebooklm, rugby-session-coach, stoic-reflection-coach, youtube-search, yt-research-pipeline)
+- `skills/notebooklm/` is gitignored (`.gitignore:153`) — a fresh clone registers 4 skills, not 5
 - Single-file server: `mcp_server.py`
-- Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/claude-mcp-skills-server/`
+- Obsidian: none (no vault folder exists)
 
 ## Blocker
 None
 
 ## Last session
-2026-09-21 — Cursory review: working tree clean, all 5 skills import/register without warnings.
+2026-09-22 — Triage. No secrets in history, remote exists, entry point intact. Lesson: just because something works is no excuse for ignoring how it works and not exploiting it further.
