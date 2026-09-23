@@ -1,7 +1,7 @@
 # NOW — claude-mcp-skills-server
 
 ## Status
-QUEUED — no active work, repo healthy; intent to return and develop further
+PARKED — no active work, repo healthy; intent to return and develop further (dropped from QUEUED 2026-09-23 for pitch-mate-rota)
 
 ## Next
 Read `mcp_server.py` end to end and write down how discovery, registration and the tool-call flow work; then decide what to build on it.
