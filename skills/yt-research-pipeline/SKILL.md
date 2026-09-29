@@ -1,6 +1,6 @@
 ---
 name: yt-research-pipeline
-description: Full YouTube-to-NotebookLM research pipeline. Searches YouTube for a topic, scores results by credibility (views + channel authority + engagement), feeds the top videos into a new NotebookLM notebook as sources, generates a briefing doc + podcast + infographic, and produces a local metadata report. Use this skill whenever the user wants to research a topic using YouTube videos, build a research notebook from video sources, create a podcast or briefing from YouTube content, or says anything like "research X on YouTube", "find YouTube videos about X and analyze them", "build a NotebookLM notebook from YouTube", or "create a research pipeline for X". This is a multi-step orchestration skill — always invoke it for YouTube-to-NotebookLM workflows even if the user only mentions one part.
+description: Use when the user wants a topic researched from YouTube videos, such as "research X on YouTube", "find YouTube videos about X and analyse them", "build a NotebookLM notebook from YouTube", or "make a briefing or podcast from YouTube content on X". Not for a plain video search with no NotebookLM step (use youtube-search).
 ---
 
 # YouTube → NotebookLM Research Pipeline
@@ -19,7 +19,7 @@ python "C:/Users/kenho/Projects/claude-mcp-skills-server/skills/youtube-search/s
 PYTHONUTF8=1 notebooklm auth check
 ```
 
-If NotebookLM auth fails, tell the user to run `PYTHONUTF8=1 notebooklm login` and complete the browser login before continuing.
+If NotebookLM auth fails, tell the user to run `PYTHONUTF8=1 notebooklm login` in their own terminal (it needs a browser). A pass is not proof: `auth check` validates the cookie file, not the session, so treat the Phase 4 `create` as the real auth test.
 
 ## Pipeline overview
 
@@ -114,21 +114,21 @@ This pause matters because NotebookLM source processing takes time and counts ag
 Create the notebook and add YouTube URLs as sources. Always use `PYTHONUTF8=1` on Windows:
 
 ```bash
-# Create notebook
-PYTHONUTF8=1 notebooklm create "YouTube Research: QUERY" --json
-# → save the notebook ID from output
+# Create notebook and make it current; save the notebook ID from output
+PYTHONUTF8=1 notebooklm create "YouTube Research: QUERY" --use --json
+```
 
-PYTHONUTF8=1 notebooklm use NOTEBOOK_ID
+Take URLs from `metadata_scored.json`, minus anything the user excluded in Phase 3. Do not use `score_and_report.py --urls-only` here, because it re-scores the raw file and would silently restore excluded videos.
 
-# Add each video URL as a source
-# Get URLs from scored JSON:
-python "C:/Users/kenho/Projects/claude-mcp-skills-server/skills/yt-research-pipeline/scripts/score_and_report.py" \
-  "OUTPUT_DIR/raw_results.json" \
-  --query "QUERY" \
-  --top 25 \
-  --report "OUTPUT_DIR/metadata.md" \
-  --urls-only
-# → prints one URL per line; add each with: notebooklm source add "URL" --json
+```bash
+python - <<'EOF'
+import json
+exclude = set()  # video IDs the user excluded in Phase 3
+for v in json.load(open("OUTPUT_DIR/metadata_scored.json", encoding="utf-8")):
+    if v.get("id") not in exclude:
+        print(v.get("webpage_url") or v.get("url") or f"https://www.youtube.com/watch?v={v['id']}")
+EOF
+# → one URL per line; add each with: PYTHONUTF8=1 notebooklm source add "URL" --json
 ```
 
 Add URLs in a loop, capturing source IDs for the wait step. If any source add fails (invalid URL, geo-blocked), skip it and log a warning — don't abort the whole pipeline.
@@ -152,29 +152,25 @@ Generate in this order — from most reliable to least reliable:
 
 **1. Briefing doc (always, fast and reliable):**
 ```bash
-PYTHONUTF8=1 notebooklm generate report --format briefing-doc --json
-# → save task_id
-PYTHONUTF8=1 notebooklm artifact wait TASK_ID --timeout 900
+PYTHONUTF8=1 notebooklm generate report --format briefing-doc --wait --timeout 900 --json
 PYTHONUTF8=1 notebooklm download report "OUTPUT_DIR/briefing.md"
 ```
 
 **2. Podcast / audio overview (attempt, may fail due to rate limits):**
 ```bash
-PYTHONUTF8=1 notebooklm generate audio "Focus on key findings and credibility of sources" --json
-# → save task_id
-PYTHONUTF8=1 notebooklm artifact wait TASK_ID --timeout 1200
+PYTHONUTF8=1 notebooklm generate audio "Focus on key findings and credibility of sources" --wait --timeout 1200 --json
 PYTHONUTF8=1 notebooklm download audio "OUTPUT_DIR/podcast.mp3"
 ```
 
 **3. Infographic (attempt, may fail):**
 ```bash
-PYTHONUTF8=1 notebooklm generate infographic --detail detailed --json
-# → save task_id
-PYTHONUTF8=1 notebooklm artifact wait TASK_ID --timeout 900
+PYTHONUTF8=1 notebooklm generate infographic --detail detailed --wait --timeout 900 --json
 PYTHONUTF8=1 notebooklm download infographic "OUTPUT_DIR/infographic.png"
 ```
 
-If any artifact generation fails (rate limit, timeout, error), log the failure and continue — don't block the whole pipeline. The briefing doc is the most important output.
+If any artifact generation fails (rate limit, timeout, error), note its artifact ID, log the failure and continue — don't block the whole pipeline. The briefing doc is the most important output and is almost never rate-limited; audio and infographic quotas are the usual failures.
+
+Retry a failed artifact in place rather than regenerating: `PYTHONUTF8=1 notebooklm artifact retry ARTIFACT_ID --wait` (see the `notebooklm` tool for the rest of the CLI).
 
 ## Phase 6: Final output report
 
@@ -194,9 +190,9 @@ NotebookLM notebook: "YouTube Research: QUERY"
   Sources added: N/M videos (M skipped due to errors)
   You can continue chatting with the notebook: PYTHONUTF8=1 notebooklm use NOTEBOOK_ID
 
-To retry failed artifacts:
+To retry a failed artifact:
   PYTHONUTF8=1 notebooklm use NOTEBOOK_ID
-  PYTHONUTF8=1 notebooklm generate audio --retry 3
+  PYTHONUTF8=1 notebooklm artifact retry ARTIFACT_ID --wait
 ```
 
 ## Output folder naming
@@ -215,21 +211,10 @@ Create it in the current working directory, or in a `~/Research/` folder if the 
 
 | Situation | Action |
 |-----------|--------|
-| NotebookLM not authenticated | Stop, tell user to run `PYTHONUTF8=1 notebooklm login` **in their own terminal** — it needs a browser and cannot be driven from inside a session |
-| `auth check` passes but `create` redirects to accounts.google.com | **`auth check` validates the cookie file, not the session** — a pass is not proof. Treat the first real call as the auth test |
+| NotebookLM not authenticated, or `create` redirects to accounts.google.com | Stop; user runs `PYTHONUTF8=1 notebooklm login` in their own terminal (see prerequisite check) |
 | YouTube search returns < 5 results | Warn user, suggest wider time window (--months 12) |
 | `ERROR: Search timed out after 180 seconds.` | `--results` too high. Drop to 15 and add another query angle. Never raise it above 15 |
 | Source add fails for a URL | Skip and log; proceed with the others |
 | Source processing fails | Mark as failed in summary; exclude from generation |
-| Artifact generation rate-limited | Log failure, include retry command in summary |
+| Artifact generation rate-limited | Log failure, include `artifact retry` command in summary |
 | User wants fewer/more sources | Adjust `--top` in the scoring step |
-
-## Rate limit awareness
-
-NotebookLM enforces quotas on audio, video, quiz, and infographic generation. If the user has been generating a lot of content recently, artifact generation may fail. The briefing doc (text report) is almost never rate-limited and should always succeed.
-
-If generation fails, include this in the summary and tell the user they can retry later with:
-```bash
-PYTHONUTF8=1 notebooklm use NOTEBOOK_ID
-PYTHONUTF8=1 notebooklm generate audio --retry 3
-```

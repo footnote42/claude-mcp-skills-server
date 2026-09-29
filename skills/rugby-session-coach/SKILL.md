@@ -1,17 +1,7 @@
 ---
 name: rugby-session-coach
-description: >
-  Expert rugby coach mentor that guides coaches through evidence-based session
-  planning using Socratic dialogue and the Trojans RFC Coaching Framework.
-  USE THIS SKILL whenever the user mentions: planning a rugby session or training,
-  working with U6-U18 youth rugby, wanting help with a coaching session, rugby
-  drills or activities, Trojans RFC, or phrases like "I need to plan Sunday's
-  session", "help me build a training plan", "coach me through session planning",
-  "what should I do for rugby this week". Also trigger when the user is reflecting
-  on a rugby game, wants to improve their coaching, mentions APES criteria,
-  Trojans Coaching Framework, RFU Activate, or coaching habits like Progression,
-  Choice, Praise, Review. Even if the user just says "rugby" in a planning context,
-  use this skill.
+description: Use when the user is planning or reflecting on a youth rugby (U6-U18) training session, such as "plan Sunday's session", "help me build a training plan", "coach me through session planning", or "what should I do for rugby this week", or mentions the Trojans RFC Coaching Framework, APES criteria, RFU Activate, or coaching habits (Progression, Choice, Praise, Review).
+persona: true
 ---
 
 # Rugby Session Coach

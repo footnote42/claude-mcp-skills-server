@@ -3,7 +3,8 @@ Wayne's MCP Skills Server
 Auto-discovers skills from ./skills/ and registers them as MCP tools.
 
 Adding a new skill: drop a folder containing SKILL.md into ./skills/, restart server.
-SKILL.md must have frontmatter with 'name' and 'description' fields.
+SKILL.md must have frontmatter with 'name' and a single-line 'description'.
+Add 'persona: true' to wrap the body as a coaching persona.
 """
 import re
 from pathlib import Path
@@ -78,6 +79,7 @@ def discover_skills() -> list[dict]:
             "tool_name": tool_name,
             "description": metadata.get("description", f"Activate the {metadata['name']} coaching skill"),
             "skill_file": skill_file,
+            "persona": metadata.get("persona", "").lower() == "true",
         })
 
     return skills
@@ -99,16 +101,18 @@ def register_skill_tools() -> None:
                 content = skill_data["skill_file"].read_text(encoding="utf-8")
                 _, body = parse_frontmatter(content)
                 display_name = skill_data["name"].replace("-", " ").title()
+                # Relative paths in the body (references/, scripts/) resolve against this folder
+                skill_dir = skill_data["skill_file"].parent.as_posix()
+                location = f"Skill folder: `{skill_dir}/`. Relative paths below resolve against it.\n\n"
+                if not skill_data["persona"]:
+                    return f"## {display_name}\n\n{location}{body}"
                 return (
                     f"## {display_name} — Coaching Persona Activated\n\n"
-                    f"**IMPORTANT: You are now operating as the {display_name}. "
-                    f"Strictly follow the instructions, persona, methodology, and "
-                    f"frameworks below for the entire rest of this session.**\n\n"
-                    f"---\n\n"
+                    f"You are now operating as the {display_name}. Follow the persona, "
+                    f"methodology, and frameworks below for the rest of this session.\n\n"
+                    f"{location}"
                     f"{body}\n\n"
-                    f"---\n\n"
-                    f"You are now in character. Introduce yourself briefly as this coach "
-                    f"and begin with your opening question."
+                    f"Introduce yourself briefly as this coach and begin with your opening question."
                 )
             return handler
 

@@ -8,7 +8,7 @@ Built and maintained using vibe-coding methodology: Claude Code writes the imple
 
 ## What it does
 
-Skills in this server are just markdown files. Each `SKILL.md` defines a persona, a methodology, and a set of instructions. When Claude invokes a skill tool, the server reads the file fresh, wraps it in a persona-activation prompt, and returns it — transforming Claude into a specialist for that conversation.
+Skills in this server are just markdown files. Each `SKILL.md` defines a persona, a methodology, and a set of instructions. When Claude invokes a skill tool, the server reads the file fresh, prefixes the skill folder path (so relative `references/` and `scripts/` paths resolve), and returns it. Skills with `persona: true` in frontmatter are also wrapped in a persona-activation prompt, which turns Claude into a specialist for that conversation.
 
 The server is also a practical demonstration of agentic AI composition: skills like `yt-research-pipeline` don't just return text, they orchestrate multi-step workflows across external tools (yt-dlp, the NotebookLM CLI) with background subagents handling long-running tasks while the main conversation stays unblocked.
 
@@ -37,7 +37,7 @@ The server is a single Python file, `mcp_server.py`, built on [FastMCP](https://
 
 **Startup flow:** `register_skill_tools()` scans `skills/` → reads `SKILL.md` frontmatter → derives tool name (`invoke_<sanitized_name>`) → registers handler via `mcp.tool()`.
 
-**Tool call flow:** Handler re-reads `SKILL.md` fresh on every invocation (so you can edit a skill without restarting the server), strips frontmatter, wraps body in a persona-activation prompt, returns as string.
+**Tool call flow:** Handler re-reads `SKILL.md` fresh on every invocation (so you can edit a skill without restarting the server), strips frontmatter, prefixes the skill folder path, wraps the body in a persona-activation prompt only when frontmatter sets `persona: true`, and returns it as a string. Descriptions are read at startup, so changing one needs a reconnect.
 
 One deliberate design decision: tool names are derived from the `name` frontmatter field, not the folder name. The folder is just storage; the name in frontmatter is what Claude sees. A factory function closes over each skill's data to avoid the classic late-binding closure bug in Python loops.
 
@@ -68,7 +68,7 @@ Full programmatic access to Google NotebookLM — including capabilities not exp
 End-to-end orchestration pipeline: YouTube search → credibility scoring → NotebookLM notebook → artefact generation.
 
 **Pipeline stages:**
-1. Search YouTube via yt-dlp (fetches 40 candidates)
+1. Search YouTube via yt-dlp: 3-4 narrow queries at 15 results each, merged (40-50 candidates; a single query at 40 hits the 180s ceiling)
 2. Score and re-rank by credibility (40% view popularity, 30% channel authority, 30% engagement ratio)
 3. Confirm top results with the user before proceeding
 4. Create a NotebookLM notebook and add top video URLs as sources
