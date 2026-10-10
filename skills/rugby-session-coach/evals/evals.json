@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "I need to plan a session for my U10s this Sunday. I'm thinking we should work on passing, tackling, rucking, and maybe some lineout practice too. We've got about 18 kids coming and two other coaches. It's been a bit chaotic lately and I want to make sure we cover everything.",
-      "expected_output": "The skill should: (1) use Socratic questioning rather than prescribing a plan, (2) challenge the over-ambitious multi-topic agenda and push the coach to identify ONE priority, (3) ask about recent observations to ground the session in evidence, (4) note that U10 sessions are 60 mins, (5) NOT immediately produce a session plan — keep the conversation going to draw out the coach's thinking.",
+      "expected_output": "The skill should: (1) use Socratic questioning rather than prescribing a plan, (2) challenge the over-ambitious multi-topic agenda and push the coach to identify ONE priority, (3) ask about recent observations to ground the session in evidence, (4) ask how long the session is, (5) NOT immediately produce a session plan — keep the conversation going to draw out the coach's thinking.",
       "files": []
     },
     {
@@ -17,6 +17,12 @@
       "id": 3,
       "prompt": "We just had a really tough game with the U7s yesterday — lots of kids crying, parents complaining, and the session felt like chaos. I want to reflect on what went wrong and then plan a better session for next week.",
       "expected_output": "The skill should: (1) start with empathy — acknowledge this sounds hard before jumping into problem-solving, (2) use reflective questions to help the coach analyse what happened (what did they observe, what surprised them, what would they do differently), (3) explore whether the session design contributed to the chaos or if other factors were at play, (4) naturally transition from reflection to next-session planning once learnings are clear, (5) for U7s: ensure any plan stays simple (tag/touch, activities <5 mins, fun-focused). Should treat this as both a reflection AND a planning conversation.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Retro time. U11 festival yesterday. First game we got hammered, nobody would tackle. I had a word after and they came up as a line and tackled much better. But honestly the main problem is discipline, they just won't listen at training, so I'm going to sort that out first.",
+      "expected_output": "The skill should follow references/reflection.md: (1) ask for the plain story of the day before judging, (2) not accept 'discipline first' at face value — challenge it with evidence, e.g. the coach's own account that they responded once they understood why, and test it against talk time and standing in sessions (APES Active), (3) ask what the coach actually said after the first game, (4) turn to the coach's own conduct with a control sort, (5) not jump to a session plan before a verdict is confirmed.",
       "files": []
     }
   ]
