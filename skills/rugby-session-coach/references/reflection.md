@@ -43,7 +43,7 @@ Run it two questions per turn: usually one fact check and one real question. Let
 
 ## Output
 
-One page per retro. When the Obsidian vault is reachable, write it to `C:/Users/kenho/Obsidian/Second Brain/Areas/Personal Development/Reflective Practice/Rugby Sessions/<YYYYYY>-Season/YYYYMMDD - <Event>.md` (date of the session, season folder like `202627-Season`, create it if new). Otherwise — on mobile — output the page as a markdown block for the coach to paste.
+One page per retro. When the Obsidian vault is reachable, write it beside the season it belongs to: `C:/Users/kenho/Obsidian/Second Brain/Areas/Rugby Coaching/Seasons/<YYYYYY>-Season/Sessions/YYYYMMDD - <Event>.md` (date of the session, season folder like `202627-Season`, create `Sessions/` if new). Otherwise — on mobile — output the page as a markdown block for the coach to paste.
 
 ```yaml
 ---
