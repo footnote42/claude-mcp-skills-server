@@ -1,16 +1,7 @@
 # NOW — claude-mcp-skills-server
 
-## Start here (fresh agent, 2026-10-25)
-1. Read this file, then `CLAUDE.md`, then this repo's open issues and PRs on GitHub.
-2. The plan to 13 Nov is programme `docs/plan-2026-11.md` (agreed by Wayne 25 Oct). Three streams are active: home-lab Phase 1, Command Centre with Comms, and Holly. Nothing outside them starts without Wayne's yes.
-3. Ground rules (Wayne, 22-25 Oct 2026):
-   - Work through GitHub issues. Comment on an issue when you take it; never work on one another session has claimed.
-   - Agents never merge PRs and never run `hl-apply`. When a PR is green, comment on the PR: `ready for Holly: <repo>#<n> <sha>`. For an on-box step, comment `hl-apply <name> needed` on the issue. Holly (the chief of staff on New Dave) scans GitHub hourly and does the merge or the apply.
-   - No root. Root work goes to Holly's reviewed-script route (`hl-apply`) or to Wayne as a script.
-   - The move to New Dave is Holly's: home-lab #21, #70 and anything labelled `newdave`, plus the health check. Don't touch them.
-   - Comms is left to nitro and Holly on New Dave.
-   - No secrets, IPs or hostnames in any file, issue or comment.
-   - Wayne is not an advanced GitHub user: when he has to do something, give him the exact clicks or commands.
+## Start here
+Start here: read programme `NOW.md` (Start here) and `CLAUDE.md`; this repo's own notes follow.
 
 ## Status
 PARKED — in production use as `wayne-skills`, healthy; not in programme plan-2026-11. No open issues or PRs.
