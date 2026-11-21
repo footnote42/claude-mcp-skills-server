@@ -43,7 +43,7 @@ Run it two questions per turn: usually one fact check and one real question. Let
 
 ## Output
 
-One page per retro. When the Obsidian vault is reachable, write it beside the season it belongs to: `C:/Users/kenho/Obsidian/Second Brain/Areas/Rugby Coaching/Seasons/<YYYYYY>-Season/Sessions/YYYYMMDD - <Event>.md` (date of the session, season folder like `202627-Season`, create `Sessions/` if new). Otherwise — on mobile — output the page as a markdown block for the coach to paste.
+One page per retro, filed as in **Filing** in `SKILL.md`: `Areas/Rugby Coaching/Seasons/<season>/Sessions/YYYYMMDD - <Event>.md` in the Obsidian vault, dated the day of the session. On mobile, output the page as a markdown block for the coach to paste.
 
 ```yaml
 ---
@@ -51,7 +51,7 @@ type: log
 title: YYYYMMDD - <Event>
 description: "<one line: squad, event, the verdict in brief>"
 domain: coaching
-tags: [rugby, <age group>, <festival|training>, reflection]
+tags: [rugby, u11, <festival|training>, reflection]
 created: <today>
 timestamp: <today>T00:00:00Z
 status: active
@@ -60,7 +60,7 @@ status: active
 
 Sections: **Verdict** · **The day** · **Threads** (the table, with `⚠ VERIFY` items) · **The method** (the coach's words from step 4) · **My conduct** (owned; challenges and the coach's answers; the Stoic sort) · **Into next session** (purpose, evidence, decisions).
 
-Children: first names only. Injuries recorded without name or medical detail.
+Children: first names or initials only (the data rule in `Areas/Rugby Coaching/CLAUDE.md`). Injuries recorded without name or medical detail.
 
 ## Done when
 
