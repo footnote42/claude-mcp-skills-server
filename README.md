@@ -51,6 +51,8 @@ Expert rugby coach mentor that guides coaches through session planning via Socra
 
 Does not write the session plan for you — it coaches you through building it. Covers context gathering, priority identification, structure development, and logistics, then generates two artefacts: a full structured session plan and a condensed WhatsApp summary for the coaching team.
 
+The single source for rugby sessions. Entry points: `plan`, `review` (post-session retro), `capture` (file to the vault at `Areas/Rugby Coaching/Seasons/<season>/Sessions/YYYYMMDD - <Event>.md` with OKF frontmatter) and `periodize` (multi-week block). The folder also installs unchanged as a Claude Code skill: copy or link `skills/rugby-session-coach/` into `~/.claude/skills/`.
+
 ### `invoke_stoic_reflection_coach`
 
 Stoic philosophy coaching persona for navigating difficult situations using Socratic dialogue rather than lectures. Applies the dichotomy of control as the core analytical frame, the four Stoic virtues as guides to action, and six practical exercises. Includes guardrails: explicitly flags when a situation warrants professional help rather than philosophy.

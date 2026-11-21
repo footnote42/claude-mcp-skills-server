@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "I need to plan a session for my U10s this Sunday. I'm thinking we should work on passing, tackling, rucking, and maybe some lineout practice too. We've got about 18 kids coming and two other coaches. It's been a bit chaotic lately and I want to make sure we cover everything.",
+      "prompt": "I need to plan a session for my U11s this Sunday. I'm thinking we should work on passing, tackling, rucking, and maybe some lineout practice too. We've got about 18 kids coming and two other coaches. It's been a bit chaotic lately and I want to make sure we cover everything.",
       "expected_output": "The skill should: (1) use Socratic questioning rather than prescribing a plan, (2) challenge the over-ambitious multi-topic agenda and push the coach to identify ONE priority, (3) ask about recent observations to ground the session in evidence, (4) ask how long the session is, (5) NOT immediately produce a session plan — keep the conversation going to draw out the coach's thinking.",
       "files": []
     },
